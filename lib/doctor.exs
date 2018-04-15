@@ -7,7 +7,9 @@ defmodule Doctor do
     Common.declare_architecture(channel)
     {:ok, %{queue: callback_queue}} = AMQP.Queue.declare(channel,
                                                      "",
-                                                     exclusive: true)
+                                                     exclusive: false) #change to true later
+    AMQP.Queue.bind(channel, callback_queue, 
+                    Common.response_exchange(), routing_key: callback_queue)
     AMQP.Basic.consume(channel, callback_queue)
     spawn_input_manager()
     wait_for_input_or_answer(channel, callback_queue)

@@ -10,6 +10,7 @@ defmodule Common do
   def declare_architecture(channel) do
     AMQP.Exchange.declare(channel, test_order_exchange(), :topic)
     AMQP.Exchange.declare(channel, log_exchange(), :topic)
+    AMQP.Exchange.declare(channel, response_exchange(), :topic)
     Enum.each(available_proffesions(), fn(prof) -> declare_queue(channel, q_name_for(prof)) end)
     Enum.each(available_proffesions(), fn(prof) -> bind(channel, prof) end)
   end
@@ -31,6 +32,7 @@ defmodule Common do
   defp key_for(prof), do: Atom.to_string(prof)
   def test_order_exchange, do: "TEST_ORDER_EXCHANGE"
   def log_exchange, do: "LOG_EXCHANGE"
+  def response_exchange, do: "RESPONSE_EXCHANGE"
 
   def new_correlation() do
     :erlang.unique_integer

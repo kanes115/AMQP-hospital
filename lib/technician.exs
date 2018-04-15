@@ -22,7 +22,7 @@ defmodule Technician do
 	response = String.trim(message) <> meta.routing_key <> "done"
 	IO.puts "Got req of id #{meta.correlation_id}"
         AMQP.Basic.publish(channel,
-                           "",
+                           Common.response_exchange(),
                            meta.reply_to,
                            response,
                            correlation_id: meta.correlation_id)

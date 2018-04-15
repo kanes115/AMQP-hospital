@@ -8,6 +8,8 @@ defmodule Admin do
     AMQP.Queue.declare(channel, "admin_q")
     AMQP.Queue.bind(channel, "admin_q", Common.test_order_exchange(),
                                                                    routing_key: "#")
+    AMQP.Queue.bind(channel, "admin_q", Common.response_exchange(),
+                                                                   routing_key: "#")
     AMQP.Basic.consume(channel, "admin_q")
     wait_for_message(channel)
   end
@@ -15,7 +17,7 @@ defmodule Admin do
   defp wait_for_message(channel) do
     receive do
       {:basic_deliver, message, meta} ->
-        IO.puts "[log] message: #{message} routing key: #{meta.routing_key}"
+        IO.puts "[log] message: #{String.strip(message)} routing key: #{meta.routing_key}"
         AMQP.Basic.publish(channel,
                            "",
                            Common.log_exchange(),
