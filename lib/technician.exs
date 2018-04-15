@@ -47,10 +47,10 @@ defmodule Technician do
                                                  "",
                                                  exclusive: false) #change to true later
     AMQP.Queue.bind(channel, info_q, Common.info_exchange())
-    AMQP.Basic.consume(channel, info_q)
+    AMQP.Basic.consume(channel, info_q, nil, no_ack: true)
     proffessions
     |> Enum.each(fn(prof) -> 
-		   AMQP.Basic.consume(channel, Common.q_name_for(prof), nil, no_ack: false) end)
+		   AMQP.Basic.consume(channel, Common.q_name_for(prof), nil, no_ack: true) end)
 
     wait_for_messages(channel)
     

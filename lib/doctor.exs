@@ -12,7 +12,7 @@ defmodule Doctor do
                     Common.response_exchange(), routing_key: callback_queue)
     AMQP.Queue.bind(channel, callback_queue, 
                     Common.info_exchange())
-    AMQP.Basic.consume(channel, callback_queue)
+    AMQP.Basic.consume(channel, callback_queue, nil, no_ack: true)
     spawn_input_manager()
     wait_for_input_or_answer(channel, callback_queue)
   end

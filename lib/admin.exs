@@ -10,7 +10,7 @@ defmodule Admin do
                                                                    routing_key: "#")
     AMQP.Queue.bind(channel, "admin_q", Common.response_exchange(),
                                                                    routing_key: "#")
-    AMQP.Basic.consume(channel, "admin_q")
+    AMQP.Basic.consume(channel, "admin_q", nil, no_ack: true)
     wait_for_message(channel)
   end
 
