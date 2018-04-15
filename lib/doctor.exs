@@ -10,6 +10,8 @@ defmodule Doctor do
                                                      exclusive: false) #change to true later
     AMQP.Queue.bind(channel, callback_queue, 
                     Common.response_exchange(), routing_key: callback_queue)
+    AMQP.Queue.bind(channel, callback_queue, 
+                    Common.info_exchange())
     AMQP.Basic.consume(channel, callback_queue)
     spawn_input_manager()
     wait_for_input_or_answer(channel, callback_queue)
@@ -28,7 +30,12 @@ defmodule Doctor do
         send_test_req(channel, surname, test_type, callback_queue, req_id)
         wait_for_input_or_answer(channel, callback_queue)
       {:basic_deliver, result, meta} ->
-        IO.puts "I've got result for req_id #{meta.correlation_id}: #{result}"
+        case String.starts_with?(result, "[log]") do
+          true ->
+            IO.puts result
+          _ ->
+            IO.puts "I've got result for req_id #{meta.correlation_id}: #{result}"
+        end
         wait_for_input_or_answer(channel, callback_queue)
     end
   end

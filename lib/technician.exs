@@ -20,12 +20,17 @@ defmodule Technician do
     receive do
       {:basic_deliver, message, meta} ->
 	response = String.trim(message) <> meta.routing_key <> "done"
-	IO.puts "Got req of id #{meta.correlation_id}"
-        AMQP.Basic.publish(channel,
-                           Common.response_exchange(),
-                           meta.reply_to,
-                           response,
-                           correlation_id: meta.correlation_id)
+        case meta.correlation_id do
+          :undefined -> #it's log
+            IO.puts message
+          _ -> #it's request
+	    IO.puts "Got req of id #{meta.correlation_id}"
+            AMQP.Basic.publish(channel,
+                               Common.response_exchange(),
+                               meta.reply_to,
+                               response,
+                               correlation_id: meta.correlation_id)
+        end
         wait_for_messages(channel)
     end
   end
@@ -38,6 +43,11 @@ defmodule Technician do
     {:ok, channel} = AMQP.Channel.open(connection)
 
     Common.declare_architecture(channel)
+    {:ok, %{queue: info_q}} = AMQP.Queue.declare(channel,
+                                                 "",
+                                                 exclusive: false) #change to true later
+    AMQP.Queue.bind(channel, info_q, Common.info_exchange())
+    AMQP.Basic.consume(channel, info_q)
     proffessions
     |> Enum.each(fn(prof) -> 
 		   AMQP.Basic.consume(channel, Common.q_name_for(prof), nil, no_ack: false) end)

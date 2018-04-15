@@ -17,11 +17,9 @@ defmodule Admin do
   defp wait_for_message(channel) do
     receive do
       {:basic_deliver, message, meta} ->
-        IO.puts "[log] message: #{String.strip(message)} routing key: #{meta.routing_key}"
-        AMQP.Basic.publish(channel,
-                           "",
-                           Common.log_exchange(),
-                           message)
+        log =  "[log] message: #{String.strip(message)} routing key: #{meta.routing_key}"
+        IO.puts log
+        AMQP.Basic.publish(channel,Common.info_exchange(), "", log)
         wait_for_message(channel)
     end
   end
